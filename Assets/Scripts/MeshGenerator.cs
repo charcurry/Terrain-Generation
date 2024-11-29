@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(MeshFilter))]
 public class MeshGenerator : MonoBehaviour
@@ -15,18 +15,27 @@ public class MeshGenerator : MonoBehaviour
     public int xSize;
     public int zSize;
 
+    public float offsetX;
+    public float offsetY;
+
     public Gradient gradient;
 
     private float minTerrainHeight;
     private float maxTerrainHeight;
 
+    [Header("Sliders")]
+    [SerializeField]
+    public Slider offsetXSlider;
+    public Slider offsetYSlider;
+
+    public Slider octavesSlider;
+    public Slider scaleSlider;
+
+    [Header("Octave Variables")]
     // Variables pertaining to octaves
     #region Octaves Variables
     public int octaves;
     public float scale;
-
-    public float offsetX;
-    public float offsetY;
 
     public float frequency1;
     public float amplitude1;
@@ -59,6 +68,8 @@ public class MeshGenerator : MonoBehaviour
 
         CreateMesh();
         UpdateMesh();
+        GetSliders();
+        SetSliders();
     }
 
     private void Update()
@@ -66,6 +77,7 @@ public class MeshGenerator : MonoBehaviour
         CreateMesh();
         UpdateMesh();
         ResetMinMax();
+        UpdateSliders();
     }
 
     public void ResetMinMax()
@@ -193,6 +205,33 @@ public class MeshGenerator : MonoBehaviour
                 Gizmos.DrawSphere(vertices[i], 0.1f);
             }
         }
+    }
+
+    void GetSliders()
+    {
+        offsetXSlider = GameObject.Find("OffsetXSlider").GetComponent<Slider>();
+        offsetYSlider = GameObject.Find("OffsetYSlider").GetComponent<Slider>();
+
+        octavesSlider = GameObject.Find("OctavesSlider").GetComponent<Slider>();
+        scaleSlider = GameObject.Find("ScaleSlider").GetComponent<Slider>();
+    }
+
+    private void SetSliders()
+    {
+        offsetXSlider.value = offsetX;
+        offsetYSlider.value = offsetY;
+
+        octavesSlider.value = octaves;
+        scaleSlider.value = scale;
+    }
+
+    private void UpdateSliders()
+    {
+        offsetX = offsetXSlider.value;
+        offsetY = offsetYSlider.value;
+
+        octaves = (int)octavesSlider.value;
+        scale = scaleSlider.value;
     }
 
     // Makes sure values stay inside of a certain range to avoid errors
