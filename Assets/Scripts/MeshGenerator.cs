@@ -25,11 +25,28 @@ public class MeshGenerator : MonoBehaviour
 
     [Header("Sliders")]
     [SerializeField]
+
+    public Slider xSizeSlider;
+    public Slider zSizeSlider;
+
     public Slider offsetXSlider;
     public Slider offsetYSlider;
 
     public Slider octavesSlider;
     public Slider scaleSlider;
+
+    public Slider frequency1Slider;
+    public Slider amplitude1Slider;
+    public Slider frequency2Slider;
+    public Slider amplitude2Slider;
+    public Slider frequency3Slider;
+    public Slider amplitude3Slider;
+    public Slider frequency4Slider;
+    public Slider amplitude4Slider;
+    public Slider frequency5Slider;
+    public Slider amplitude5Slider;
+    public Slider frequency6Slider;
+    public Slider amplitude6Slider;
 
     [Header("Octave Variables")]
     // Variables pertaining to octaves
@@ -68,7 +85,6 @@ public class MeshGenerator : MonoBehaviour
 
         CreateMesh();
         UpdateMesh();
-        GetSliders();
         SetSliders();
     }
 
@@ -207,31 +223,56 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
-    void GetSliders()
-    {
-        offsetXSlider = GameObject.Find("OffsetXSlider").GetComponent<Slider>();
-        offsetYSlider = GameObject.Find("OffsetYSlider").GetComponent<Slider>();
-
-        octavesSlider = GameObject.Find("OctavesSlider").GetComponent<Slider>();
-        scaleSlider = GameObject.Find("ScaleSlider").GetComponent<Slider>();
-    }
-
+    // Sets the sliders to the current values
     private void SetSliders()
     {
+        xSizeSlider.value = xSize;
+        zSizeSlider.value = zSize;
+
         offsetXSlider.value = offsetX;
         offsetYSlider.value = offsetY;
 
         octavesSlider.value = octaves;
         scaleSlider.value = scale;
+
+        frequency1Slider.value = frequency1;
+        amplitude1Slider.value = amplitude1;
+        frequency2Slider.value = frequency2;
+        amplitude2Slider.value = amplitude2;
+        frequency3Slider.value = frequency3;
+        amplitude3Slider.value = amplitude3;
+        frequency4Slider.value = frequency4;
+        amplitude4Slider.value = amplitude4;
+        frequency5Slider.value = frequency5;
+        amplitude5Slider.value = amplitude5;
+        frequency6Slider.value = frequency6;
+        amplitude6Slider.value = amplitude6;
     }
 
+    // Updates the current values from the sliders
     private void UpdateSliders()
     {
+        xSize = (int)xSizeSlider.value;
+        zSize = (int)zSizeSlider.value;
+
         offsetX = offsetXSlider.value;
         offsetY = offsetYSlider.value;
 
         octaves = (int)octavesSlider.value;
         scale = scaleSlider.value;
+
+        frequency1 = frequency1Slider.value;
+        amplitude1 = amplitude1Slider.value;
+        frequency2 = frequency2Slider.value;
+        amplitude2 = amplitude2Slider.value;
+        frequency3 = frequency3Slider.value;
+        amplitude3 = amplitude3Slider.value;
+        frequency4 = frequency4Slider.value;
+        amplitude4 = amplitude4Slider.value;
+        frequency5 = frequency5Slider.value;
+        amplitude5 = amplitude5Slider.value;
+        frequency6 = frequency6Slider.value;
+        amplitude6 = amplitude6Slider.value;
     }
 
     // Makes sure values stay inside of a certain range to avoid errors
