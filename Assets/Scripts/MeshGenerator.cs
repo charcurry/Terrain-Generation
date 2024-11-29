@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(MeshFilter))]
 public class MeshGenerator : MonoBehaviour
@@ -19,13 +20,38 @@ public class MeshGenerator : MonoBehaviour
     private float minTerrainHeight;
     private float maxTerrainHeight;
 
-    public float noiseMultiplier = 2;
+    public int Octaves = 6;
+    public float Scale = 0.3f;
+
+    public float offsetX = 0f;
+    public float offsetY = 0f;
+
+    public float Frequency_01 = 5f;
+    public float FreqAmp_01 = 3f;
+
+    public float Frequency_02 = 6f;
+    public float FreqAmp_02 = 2.5f;
+
+    public float Frequency_03 = 3f;
+    public float FreqAmp_03 = 1.5f;
+
+    public float Frequency_04 = 2.5f;
+    public float FreqAmp_04 = 1f;
+
+    public float Frequency_05 = 2f;
+    public float FreqAmp_05 = .7f;
+
+    public float Frequency_06 = 1f;
+    public float FreqAmp_06 = .5f;
 
     // Start is called before the first frame update
     void Start()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+
+        offsetX = Random.Range(0f, 99999f);
+        offsetY = Random.Range(0f, 99999f);
 
         CreateShape();
         UpdateMesh();
@@ -52,7 +78,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= xSize; x++)
             {
-                float y = Mathf.PerlinNoise((float)x * 0.3f, (float)z * 0.3f) * noiseMultiplier;
+                float y = Calculate(x, z);
                 verticies[i] = new Vector3(x, y, z);
 
                 if (y > maxTerrainHeight)
@@ -115,6 +141,23 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
+    float Calculate(float x, float z)
+    {
+        float[] octaveFrequencies = new float[] { Frequency_01, Frequency_02, Frequency_03, Frequency_04, Frequency_05, Frequency_06 };
+        float[] octaveAmplitudes = new float[] { FreqAmp_01, FreqAmp_02, FreqAmp_03, FreqAmp_04, FreqAmp_05, FreqAmp_06 };
+        float y = 0;
+
+        for (int i = 0; i < Octaves; i++)
+        {
+            y += octaveAmplitudes[i] * Mathf.PerlinNoise(
+                     octaveFrequencies[i] * x + offsetX * Scale,
+                     octaveFrequencies[i] * z + offsetY * Scale);
+
+        }
+
+        return y;
+    }
+
     //private void OnDrawGizmos()
     //{
     //    for (int i = 0;  i < verticies.Length; i++)
@@ -122,4 +165,17 @@ public class MeshGenerator : MonoBehaviour
     //        Gizmos.DrawSphere(verticies[i], 0.1f);
     //    }
     //}
+
+    private void OnValidate()
+    {
+        if (Octaves < 1)
+        {
+            Octaves = 1;
+        }
+        if (Octaves > 6)
+        {
+            Octaves = 6;
+        }
+    }
+
 }
