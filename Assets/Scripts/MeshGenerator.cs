@@ -8,7 +8,7 @@ public class MeshGenerator : MonoBehaviour
 
     public bool drawGizmos = false;
 
-    Vector3[] verticies;
+    Vector3[] vertices;
     int[] triangles;
     Color[] colors;
 
@@ -19,8 +19,9 @@ public class MeshGenerator : MonoBehaviour
 
     private float minTerrainHeight;
     private float maxTerrainHeight;
-    
+
     // Variables pertaining to octaves
+    #region Octaves Variables
     public int octaves;
     public float scale;
 
@@ -44,6 +45,7 @@ public class MeshGenerator : MonoBehaviour
 
     public float frequency6;
     public float amplitude6;
+    #endregion
 
     // Start is called before the first frame update
     void Start()
@@ -85,14 +87,14 @@ public class MeshGenerator : MonoBehaviour
     // Creates the verticies given the x & zSize (the map size)
     void CreateVerticies()
     {
-        verticies = new Vector3[(xSize + 1) * (zSize + 1)];
+        vertices = new Vector3[(xSize + 1) * (zSize + 1)];
 
         for (int i = 0, z = 0; z <= zSize; z++)
         {
             for (int x = 0; x <= xSize; x++)
             {
                 float y = CalculateY(x, z);
-                verticies[i] = new Vector3(x, y, z);
+                vertices[i] = new Vector3(x, y, z);
 
                 if (y > maxTerrainHeight)
                 {
@@ -137,13 +139,13 @@ public class MeshGenerator : MonoBehaviour
     // Gets the color the mesh is supposed to be at each elevation to look more like realistic terrain
     void GetColors()
     {
-        colors = new Color[verticies.Length];
+        colors = new Color[vertices.Length];
 
         for (int i = 0, z = 0; z <= zSize; z++)
         {
             for (int x = 0; x <= xSize; x++)
             {
-                float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, verticies[i].y);
+                float height = Mathf.InverseLerp(minTerrainHeight, maxTerrainHeight, vertices[i].y);
                 colors[i] = gradient.Evaluate(height);
                 i++;
             }
@@ -155,14 +157,14 @@ public class MeshGenerator : MonoBehaviour
     {
         mesh.Clear();
 
-        mesh.vertices = verticies;
+        mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.colors = colors;
 
         mesh.RecalculateNormals();
     }
 
-    // Calculates the y value of the given verticy using its x, z coordinates
+    // Calculates the y value of the given vertex using its x, z coordinates
     float CalculateY(float x, float z)
     {
         float[] octaveFrequencies = new float[] { frequency1, frequency2, frequency3, frequency4, frequency5, frequency6 };
@@ -186,14 +188,14 @@ public class MeshGenerator : MonoBehaviour
     {
         if (drawGizmos)
         {
-            for (int i = 0; i < verticies.Length; i++)
+            for (int i = 0; i < vertices.Length; i++)
             {
-                Gizmos.DrawSphere(verticies[i], 0.1f);
+                Gizmos.DrawSphere(vertices[i], 0.1f);
             }
         }
     }
 
-    // Makes sure values stay inside of a range
+    // Makes sure values stay inside of a certain range to avoid errors
     private void OnValidate()
     {
         if (octaves < 1)
