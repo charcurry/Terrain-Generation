@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,41 +6,44 @@ public class MeshGenerator : MonoBehaviour
 {
     Mesh mesh;
 
+    public bool drawGizmos = false;
+
     Vector3[] verticies;
     int[] triangles;
     Color[] colors;
 
-    public int xSize = 20;
-    public int zSize = 20;
+    public int xSize;
+    public int zSize;
 
     public Gradient gradient;
 
     private float minTerrainHeight;
     private float maxTerrainHeight;
+    
+    // Variables pertaining to octaves
+    public int octaves;
+    public float scale;
 
-    public int Octaves = 6;
-    public float Scale = 0.3f;
+    public float offsetX;
+    public float offsetY;
 
-    public float offsetX = 0f;
-    public float offsetY = 0f;
+    public float frequency1;
+    public float amplitude1;
 
-    public float Frequency_01 = 5f;
-    public float FreqAmp_01 = 3f;
+    public float frequency2;
+    public float amplitude2;
 
-    public float Frequency_02 = 6f;
-    public float FreqAmp_02 = 2.5f;
+    public float frequency3;
+    public float amplitude3;
 
-    public float Frequency_03 = 3f;
-    public float FreqAmp_03 = 1.5f;
+    public float frequency4;
+    public float amplitude4;
 
-    public float Frequency_04 = 2.5f;
-    public float FreqAmp_04 = 1f;
+    public float frequency5;
+    public float amplitude5;
 
-    public float Frequency_05 = 2f;
-    public float FreqAmp_05 = .7f;
-
-    public float Frequency_06 = 1f;
-    public float FreqAmp_06 = .5f;
+    public float frequency6;
+    public float amplitude6;
 
     // Start is called before the first frame update
     void Start()
@@ -50,16 +51,17 @@ public class MeshGenerator : MonoBehaviour
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
+        // Gets a random offset for the perlin noise algorythm to use
         offsetX = Random.Range(0f, 99999f);
         offsetY = Random.Range(0f, 99999f);
 
-        CreateShape();
+        CreateMesh();
         UpdateMesh();
     }
 
     private void Update()
     {
-        CreateShape();
+        CreateMesh();
         UpdateMesh();
         ResetMinMax();
     }
@@ -70,7 +72,18 @@ public class MeshGenerator : MonoBehaviour
         maxTerrainHeight = 0;
     }
 
-    private void CreateShape()
+    // Creates the mesh using the other relevant methods
+    private void CreateMesh()
+    {
+        CreateVerticies();
+
+        CreateTriangles();
+
+        GetColors();
+    }
+
+    // Creates the verticies given the x & zSize (the map size)
+    void CreateVerticies()
     {
         verticies = new Vector3[(xSize + 1) * (zSize + 1)];
 
@@ -78,7 +91,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x <= xSize; x++)
             {
-                float y = Calculate(x, z);
+                float y = CalculateY(x, z);
                 verticies[i] = new Vector3(x, y, z);
 
                 if (y > maxTerrainHeight)
@@ -93,7 +106,11 @@ public class MeshGenerator : MonoBehaviour
                 i++;
             }
         }
+    }
 
+    // Creates the triangles clockwise from each set of 3 verticies
+    void CreateTriangles()
+    {
         triangles = new int[xSize * zSize * 6];
 
         int tris = 0;
@@ -115,7 +132,11 @@ public class MeshGenerator : MonoBehaviour
             }
             vert++;
         }
-
+    }
+    
+    // Gets the color the mesh is supposed to be at each elevation to look more like realistic terrain
+    void GetColors()
+    {
         colors = new Color[verticies.Length];
 
         for (int i = 0, z = 0; z <= zSize; z++)
@@ -129,7 +150,7 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    // Updates mesh when changed
     void UpdateMesh()
     {
         mesh.Clear();
@@ -141,40 +162,56 @@ public class MeshGenerator : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
-    float Calculate(float x, float z)
+    // Calculates the y value of the given verticy using its x, z coordinates
+    float CalculateY(float x, float z)
     {
-        float[] octaveFrequencies = new float[] { Frequency_01, Frequency_02, Frequency_03, Frequency_04, Frequency_05, Frequency_06 };
-        float[] octaveAmplitudes = new float[] { FreqAmp_01, FreqAmp_02, FreqAmp_03, FreqAmp_04, FreqAmp_05, FreqAmp_06 };
+        float[] octaveFrequencies = new float[] { frequency1, frequency2, frequency3, frequency4, frequency5, frequency6 };
+        float[] octaveAmplitudes = new float[] { amplitude1, amplitude2, amplitude3, amplitude4, amplitude5, amplitude6 };
         float y = 0;
 
-        for (int i = 0; i < Octaves; i++)
+        // for each octave perform the perlin noise algorythm on the pertaining x, y, frequency, amplitude, and scale value(s)
+        for (int i = 0; i < octaves; i++)
         {
             y += octaveAmplitudes[i] * Mathf.PerlinNoise(
-                     octaveFrequencies[i] * x + offsetX * Scale,
-                     octaveFrequencies[i] * z + offsetY * Scale);
+                     octaveFrequencies[i] * x + offsetX * scale,
+                     octaveFrequencies[i] * z + offsetY * scale);
 
         }
 
         return y;
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    for (int i = 0;  i < verticies.Length; i++)
-    //    {
-    //        Gizmos.DrawSphere(verticies[i], 0.1f);
-    //    }
-    //}
+    //Draws the verticies
+    private void OnDrawGizmos()
+    {
+        if (drawGizmos)
+        {
+            for (int i = 0; i < verticies.Length; i++)
+            {
+                Gizmos.DrawSphere(verticies[i], 0.1f);
+            }
+        }
+    }
 
+    // Makes sure values stay inside of a range
     private void OnValidate()
     {
-        if (Octaves < 1)
+        if (octaves < 1)
         {
-            Octaves = 1;
+            octaves = 1;
         }
-        if (Octaves > 6)
+        if (octaves > 6)
         {
-            Octaves = 6;
+            octaves = 6;
+        }
+
+        if (xSize < 1)
+        {
+            xSize = 1;
+        }
+        if (zSize < 1)
+        {
+            zSize = 1;
         }
     }
 
